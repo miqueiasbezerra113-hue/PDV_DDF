@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDV Inteligente & Dashboard Integrado</title>
+    <!-- Tailwind CSS para Estilização de Alto Nível -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para os Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Ícones Lucide para um Visual Moderno -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin 1.5s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Barra de Navegação Superior -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-500 text-white p-2.5 rounded-xl shadow-md shadow-emerald-500/20">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight text-slate-950">PDV Inteligente</h1>
+                    <span class="text-xs text-slate-500 flex items-center gap-1">
+                        <span id="status-indicator" class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                        <span id="status-text">Monitor de Vendas e Dashboard</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Seleção de Abas de Navegação -->
+            <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                <button onclick="alternarAba('pdv')" id="tab-pdv" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-white text-slate-900 shadow-sm">
+                    <i data-lucide="receipt-text" class="w-4 h-4 text-emerald-500"></i>
+                    <span class="hidden sm:inline">Frente de Caixa</span> (PDV)
+                </button>
+                <button onclick="alternarAba('dashboard')" id="tab-dashboard" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-500"></i>
+                    Dashboard
+                </button>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="flex items-center gap-2">
+                <!-- Botão Refresh -->
+                <button onclick="refreshDashboard()" id="btn-refresh" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-600 relative" title="Atualizar Dados">
+                    <i data-lucide="refresh-cw" class="w-5 h-5" id="refresh-icon"></i>
+                    <span id="refresh-tooltip" class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity whitespace-nowrap pointer-events-none">Atualizar</span>
+                </button>
+                <!-- Botão Compartilhar -->
+                <button onclick="compartilharApp()" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-600 hidden md:inline-flex" title="Compartilhar App">
+                    <i data-lucide="share-2" class="w-5 h-5"></i>
+                </button>
+                <!-- Botão Configurações -->
+                <button onclick="abrirConfiguracoes()" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-600 relative" title="Configurações">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span id="indicador-status" class="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal Dinâmico -->
+    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- Alerta de Modo Offline / Configuração da Planilha -->
+        <div id="alerta-conexao" class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-2xl flex items-start gap-3 text-sm mb-6 hidden">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+            <div>
+                <p class="font-bold">Modo de Demonstração Ativo</p>
+                <p class="text-amber-700 text-xs mt-0.5">O sistema está rodando com dados fictícios de simulação. Clique no ícone de engrenagem no canto superior para conectar a sua própria planilha do Google Sheets.</p>
+            </div>
+        </div>
+
+        <!-- ================= ABA 1: FRENTE DE CAIXA (PDV) ================= -->
+        <section id="conteudo-pdv" class="max-w-md mx-auto space-y-6">
+            
+            <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-100/40 p-6 space-y-5">
+                <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
+                    <h2 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                        <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-500"></i> Registrar Nova Venda
+                    </h2>
+                    <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-100">
+                        PDV Ativo
+                    </span>
+                </div>
+
+                <!-- Formulário do PDV -->
+                <div class="space-y-4">
+                    <!-- Produto -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Artigo / Produto</label>
+                        <div class="relative">
+                            <select id="produto" onchange="atualizarPreco()" class="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-2xl px-4 py-3.5 appearance-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-sm">
+                                <option value="" disabled selected>Carregando produtos...</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Mostrador de Estoque Atualizado Dinamicamente -->
+                        <div id="estoque-badge" class="mt-2.5 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full w-fit hidden">
+                            <i data-lucide="package" class="w-3.5 h-3.5"></i>
+                            <span>Estoque: <span id="estoque-valor" class="font-bold">--</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Quantidade e Preço Unitário lado a lado -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Quantidade</label>
+                            <div class="flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-1">
+                                <button onclick="alterarQtd(-1)" class="w-10 h-10 hover:bg-white rounded-xl flex items-center justify-center text-slate-600 font-bold active:scale-95 transition">-</button>
+                                <input type="number" id="qtd" value="1" min="1" oninput="calcularTotal()" class="w-full text-center bg-transparent border-none outline-none font-bold text-slate-900 text-sm focus:ring-0">
+                                <button onclick="alterarQtd(1)" class="w-10 h-10 hover:bg-white rounded-xl flex items-center justify-center text-slate-600 font-bold active:scale-95 transition">+</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Preço Unit.</label>
+                            <div class="relative">
+                                <span class="absolute left-4 inset-y-0 flex items-center text-slate-400 text-sm font-semibold">R$</span>
+                                <input type="number" step="0.01" min="0" id="preco" oninput="calcularTotal()" class="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-2xl pl-10 pr-4 py-3.5 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mostrador de Total Estilizado -->
+                    <div class="bg-emerald-50/70 rounded-2xl border border-emerald-100 p-4 flex flex-col items-center justify-center my-3">
+                        <span class="text-xs text-emerald-800 font-semibold uppercase tracking-wider mb-1">Valor Total da Venda</span>
+                        <div class="text-3xl font-extrabold text-emerald-600 flex items-baseline gap-1">
+                            <span class="text-lg font-bold">R$</span>
+                            <span id="total">0,00</span>
+                        </div>
+                    </div>
+
+                    <!-- Forma de Pagamento -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Forma de Pagamento</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setPagamento('PIX')" id="btn-pix" class="pagamento-opcao py-3 px-1 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100/50 transition">PIX</button>
+                            <button onclick="setPagamento('DINHEIRO')" id="btn-dinheiro" class="pagamento-opcao py-3 px-1 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100/50 transition">Dinheiro</button>
+                            <button onclick="setPagamento('CARTÃO')" id="btn-cartao" class="pagamento-opcao py-3 px-1 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100/50 transition">Cartão</button>
+                        </div>
+                        <input type="hidden" id="pagamento" value="PIX">
+                    </div>
+
+                    <!-- Detalhes Extras (Local, Turno, Vendedor) -->
+                    <div class="border-t border-slate-100 pt-4 space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Local</label>
+                                <input id="local" value="IFCE" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Turno</label>
+                                <div class="relative">
+                                    <select id="turno" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl px-4 py-3 appearance-none text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium">
+                                        <option>MANHÃ</option>
+                                        <option>TARDE</option>
+                                        <option>NOITE</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
+                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Operador / Vendedor correspondente à planilha de Dashboard -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Vendedor / Operador</label>
+                            <div class="relative">
+                                <span class="absolute left-4 inset-y-0 flex items-center text-slate-400">
+                                    <i data-lucide="user" class="w-4 h-4"></i>
+                                </span>
+                                <select id="vendedor" class="w-full bg-slate-50 border border-slate-200 text-slate-850 rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-semibold">
+                                    <option value="Miqueias">Miqueias</option>
+                                    <option value="Lara">Lara</option>
+                                    <option value="Klein">Klein</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão de Ação -->
+                <button id="btn-registrar" onclick="salvarVenda()" class="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-98">
+                    <i data-lucide="send" class="w-5 h-5"></i> Registrar Venda
+                </button>
+            </div>
+            
+        </section>
+
+        <!-- ================= ABA 2: PAINEL DE VENDAS (DASHBOARD) ================= -->
+        <section id="conteudo-dashboard" class="hidden space-y-8">
+            
+            <!-- Cards de KPI Dinâmicos -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- KPI 1: Faturamento Total -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                    <div class="space-y-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Faturamento da Semana</p>
+                        <h3 class="text-3xl font-black text-slate-900 tracking-tight" id="kpi-total">R$ 0,00</h3>
+                        <p class="text-xs text-emerald-600 flex items-center gap-1 font-semibold">
+                            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                            Total acumulado
+                        </p>
+                    </div>
+                    <div class="bg-emerald-50 text-emerald-600 p-4 rounded-2xl border border-emerald-100">
+                        <i data-lucide="dollar-sign" class="w-7 h-7"></i>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Vendedor Destaque -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                    <div class="space-y-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Melhor Vendedor</p>
+                        <h3 class="text-3xl font-black text-slate-900 tracking-tight" id="kpi-vendedor">Carregando...</h3>
+                        <p class="text-xs text-indigo-600 flex items-center gap-1 font-semibold" id="kpi-vendedor-vendas">
+                            <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                            Maior valor acumulado
+                        </p>
+                    </div>
+                    <div class="bg-indigo-50 text-indigo-600 p-4 rounded-2xl border border-indigo-100">
+                        <i data-lucide="crown" class="w-7 h-7"></i>
+                    </div>
+                </div>
+
+                <!-- KPI 3: Média Diária -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all sm:col-span-2 lg:col-span-1">
+                    <div class="space-y-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Média de Vendas</p>
+                        <h3 class="text-3xl font-black text-slate-900 tracking-tight" id="kpi-media">R$ 0,00</h3>
+                        <p class="text-xs text-brand-600 flex items-center gap-1 font-semibold">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                            Por dia trabalhado
+                        </p>
+                    </div>
+                    <div class="bg-brand-50 text-brand-600 p-4 rounded-2xl border border-brand-100">
+                        <i data-lucide="bar-chart-2" class="w-7 h-7"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos Principais -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Gráfico 1: Vendedores Individual -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900">Vendas Consolidadas</h3>
+                            <p class="text-xs text-slate-500">Total acumulado na semana</p>
+                        </div>
+                        <span class="text-xs font-bold bg-brand-50 text-brand-600 px-2.5 py-1 rounded-full border border-brand-100">Semanal</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="graficoVendedores"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 2: Total por Dia -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900">Evolução Diária</h3>
+                            <p class="text-xs text-slate-500">Soma geral de vendas da semana</p>
+                        </div>
+                        <span class="text-xs font-bold bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full border border-emerald-100">Total Diário</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="graficoTotal"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 3: Comparação de Vendedores Diário -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-2 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900">Acompanhamento de Vendedores</h3>
+                            <p class="text-xs text-slate-500">Vendas diárias detalhadas (Lara, Miqueias e Klein)</p>
+                        </div>
+                        
+                        <!-- Filtros Rápidos -->
+                        <div class="bg-slate-100 p-1.5 rounded-2xl border border-slate-200 flex flex-wrap gap-1 w-fit">
+                            <button onclick="filtrarComparativo('todos')" id="btn-f-todos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">
+                                Todos
+                            </button>
+                            <button onclick="filtrarComparativo('lara')" id="btn-f-lara" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                                Lara
+                            </button>
+                            <button onclick="filtrarComparativo('miqueias')" id="btn-f-miqueias" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                                Miqueias
+                            </button>
+                            <button onclick="filtrarComparativo('klein')" id="btn-f-klein" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                                Klein
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="height: 380px;">
+                        <canvas id="graficoComparacao"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer Geral -->
+    <footer class="bg-white border-t border-slate-200 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span>PDV Inteligente Integrado • Google Sheets Connection</span>
+            </div>
+            <p>© 2026 Sistema PDV & Analytics. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Configuração de API -->
+    <div id="modal-config" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end justify-center sm:items-center p-4 hidden">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-xl border border-slate-100">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                    <i data-lucide="settings" class="text-slate-500"></i> Configuração de Conexão
+                </h3>
+                <button onclick="fecharConfiguracoes()" class="p-2 hover:bg-slate-100 rounded-full transition text-slate-400">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3">
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    A URL do Web App está fixa e conectada à sua planilha.
+                </p>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">URL do Web App (Fixa)</label>
+                    <input type="text" id="config-url" readonly class="w-full bg-slate-100 border border-slate-200 text-slate-600 rounded-2xl px-3.5 py-3 text-xs font-medium cursor-not-allowed">
+                </div>
+
+                <div class="bg-green-50 border border-green-100 text-green-800 rounded-2xl p-4 text-xs leading-relaxed">
+                    <strong class="flex items-center gap-1 mb-1"><i data-lucide="check-circle" class="w-4 h-4"></i>Conexão Ativa</strong>
+                    O sistema está conectado à sua planilha do Google Sheets.
+                </div>
+            </div>
+            
+            <div class="flex gap-2.5 pt-2">
+                <button onclick="fecharConfiguracoes()" class="flex-1 py-3 border border-slate-200 text-slate-600 rounded-2xl text-sm font-semibold hover:bg-slate-50 transition">Fechar</button>
+                <button onclick="refreshDashboard(); fecharConfiguracoes();" class="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-sm font-semibold transition flex items-center justify-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> Atualizar Agora
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Feedback -->
+    <div id="modal-feedback" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center space-y-4 shadow-2xl border border-slate-100">
+            <div id="feedback-icon-container" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center">
+                <!-- Inserido dinamicamente via JS -->
+            </div>
+            <div class="space-y-1">
+                <h4 id="feedback-titulo" class="font-bold text-lg text-slate-900">Processando</h4>
+                <p id="feedback-mensagem" class="text-sm text-slate-500">Enviando dados de venda para o Google Sheets...</p>
+            </div>
+            <button id="feedback-btn-fechar" onclick="fecharFeedback()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition hidden">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts de Lógica Integrada -->
+    <script>
+        // ============================================================
+        // URL FIXA DO WEB APP
+        // ============================================================
+        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycbzd8r7E55ZwAP-ysT0Zos5kTi2vlU2oIoa_1RMHgoS74WSz19jGt6d67p8qOoScCtAd0Q/exec";
+        
+        // URL da API - usando a URL fixa
+        let googleWebAppUrl = WEB_APP_URL_FIXA;
+
+        // Variáveis globais para instâncias do Chart.js
+        let chartVendedores = null;
+        let chartTotal = null;
+        let chartComparacao = null;
+        let dadosCarregados = null;
+        let isRefreshing = false;
+
+        // Produtos Padrão/Offline de Simulação
+        const produtosDemonstracao = [
+            { nome: "BROWNIE CHOCOLATE", preco: 6.00, estoque: 15 },
+            { nome: "BROWNIE LEITE NINHO", preco: 6.00, estoque: 4 },
+            { nome: "TORTA DE LIMÃO", preco: 5.00, estoque: 0 },
+            { nome: "CAFÉ", preco: 2.00, estoque: 45 },
+            { nome: "SUCO ACEROLA", preco: 4.00, estoque: 3 },
+            { nome: "SANDUÍCHE NAT.", preco: 8.00, estoque: 11 }
+        ];
+
+        let produtos = [...produtosDemonstracao];
+
+        // Paleta de Cores
+        const palette = {
+            lara: { solid: '#0ea5e9', border: '#0284c7', fill: 'rgba(14, 165, 233, 0.1)' },
+            miqueias: { solid: '#10b981', border: '#059669', fill: 'rgba(16, 185, 129, 0.1)' },
+            klein: { solid: '#a855f7', border: '#9333ea', fill: 'rgba(168, 85, 247, 0.1)' },
+            total: { border: '#6366f1', fill: 'rgba(99, 102, 241, 0.12)' }
+        };
+
+        // Dados Locais em caso de Erro de Rede ou Offline
+        const mockDadosIniciais = {
+            vendedores: [
+                { nome: "Miqueias", vendas: 3800 },
+                { nome: "Lara", vendas: 4500 },
+                { nome: "Klein", vendas: 2700 }
+            ],
+            semanal: [
+                { dia: "Segunda", total: 1700, lara: 700, miqueias: 600, klein: 400 },
+                { dia: "Terça", total: 2100, lara: 900, miqueias: 700, klein: 500 },
+                { dia: "Quarta", total: 2200, lara: 900, miqueias: 800, klein: 500 },
+                { dia: "Quinta", total: 2300, lara: 1000, miqueias: 800, klein: 500 },
+                { dia: "Sexta", total: 2700, lara: 1000, miqueias: 900, klein: 800 }
+            ]
+        };
+
+        // ============================================================
+        // FUNÇÃO DE REFRESH - ATUALIZA TODOS OS DADOS
+        // ============================================================
+        async function refreshDashboard() {
+            if (isRefreshing) return;
+            
+            isRefreshing = true;
+            const btnRefresh = document.getElementById('btn-refresh');
+            const refreshIcon = document.getElementById('refresh-icon');
+            
+            // Animação de carregamento
+            refreshIcon.className = "w-5 h-5 animate-spin-slow";
+            refreshIcon.setAttribute('data-lucide', 'loader-2');
+            lucide.createIcons();
+            
+            try {
+                // Atualiza produtos e dashboard simultaneamente
+                await Promise.all([
+                    carregarProdutosDoGoogle(),
+                    carregarDashboard()
+                ]);
+                
+                // Atualiza status
+                document.getElementById('status-text').textContent = 'Dados atualizados!';
+                setTimeout(() => {
+                    document.getElementById('status-text').textContent = 'Monitor de Vendas e Dashboard';
+                }, 2000);
+                
+                mostrarFeedback("sucesso", "Dados Atualizados!", "O Dashboard e os produtos foram recarregados com sucesso!");
+                
+            } catch (error) {
+                console.error('Erro ao atualizar:', error);
+                mostrarFeedback("erro", "Erro ao Atualizar", "Não foi possível carregar os dados. Verifique sua conexão.");
+            } finally {
+                // Restaura o ícone
+                refreshIcon.className = "w-5 h-5";
+                refreshIcon.setAttribute('data-lucide', 'refresh-cw');
+                lucide.createIcons();
+                isRefreshing = false;
+            }
+        }
+
+        // ============================================================
+        // INICIALIZAÇÃO
+        // ============================================================
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+
+            // Configura URL fixa no campo de configuração
+            document.getElementById('config-url').value = WEB_APP_URL_FIXA;
+            document.getElementById('indicador-status').className = "absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white";
+            document.getElementById('alerta-conexao').classList.add('hidden');
+            
+            // Carrega dados
+            carregarProdutosDoGoogle();
+            carregarDashboard();
+
+            const ultimoVendedor = localStorage.getItem('ultimo_vendedor');
+            if (ultimoVendedor) {
+                document.getElementById('vendedor').value = ultimoVendedor;
+            }
+
+            setPagamento('PIX');
+
+            dadosCarregados = mockDadosIniciais;
+            atualizarKPIs(dadosCarregados);
+            renderizarGraficoVendedores(dadosCarregados.vendedores);
+            renderizarGraficoTotal(dadosCarregados.semanal);
+            renderizarGraficoComparacao(dadosCarregados.semanal);
+
+            // Tooltip do botão refresh
+            const btnRefresh = document.getElementById('btn-refresh');
+            const tooltip = document.getElementById('refresh-tooltip');
+            btnRefresh.addEventListener('mouseenter', () => {
+                tooltip.classList.remove('opacity-0');
+            });
+            btnRefresh.addEventListener('mouseleave', () => {
+                tooltip.classList.add('opacity-0');
+            });
+        });
+
+        // ============================================================
+        // DEMAIS FUNÇÕES (mantidas do código anterior)
+        // ============================================================
+        
+        // Alternância de Abas
+        function alternarAba(aba) {
+            const pdvTab = document.getElementById('tab-pdv');
+            const dashTab = document.getElementById('tab-dashboard');
+            const pdvContent = document.getElementById('conteudo-pdv');
+            const dashContent = document.getElementById('conteudo-dashboard');
+
+            if (aba === 'pdv') {
+                pdvTab.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-white text-slate-900 shadow-sm";
+                dashTab.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900";
+                pdvContent.classList.remove('hidden');
+                dashContent.classList.add('hidden');
+            } else {
+                dashTab.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-white text-slate-900 shadow-sm";
+                pdvTab.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900";
+                pdvContent.classList.add('hidden');
+                dashContent.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    if (chartVendedores) chartVendedores.resize();
+                    if (chartTotal) chartTotal.resize();
+                    if (chartComparacao) chartComparacao.resize();
+                }, 50);
+            }
+        }
+
+        function compartilharApp() {
+            const shareUrl = window.location.href;
+            const tempInput = document.createElement("input");
+            tempInput.value = shareUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                const copiado = document.execCommand("copy");
+                if (copiado) {
+                    mostrarFeedback("sucesso", "Link Copiado!", "O link de acesso do aplicativo foi copiado para a área de transferência.");
+                } else {
+                    throw new Error("Erro");
+                }
+            } catch (err) {
+                mostrarFeedback("sucesso", "Link do App", "Copie o link abaixo para compartilhar:\n" + shareUrl);
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        // Carrega produtos vindos da planilha
+        async function carregarProdutosDoGoogle() {
+            if (!googleWebAppUrl) return;
+            try {
+                const resposta = await fetch(googleWebAppUrl + '?action=listarProdutos');
+                if (!resposta.ok) throw new Error();
+                const json = await resposta.json();
+                
+                if (json.sucesso && Array.isArray(json.dados)) {
+                    montarListaProdutos(json.dados);
+                }
+            } catch (error) {
+                console.warn("Falha ao obter produtos do Google Sheets. Usando demonstração.");
+                montarListaProdutos(produtosDemonstracao);
+            }
+        }
+
+        function montarListaProdutos(lista) {
+            produtos = lista;
+            const select = document.getElementById("produto");
+            select.innerHTML = "";
+            
+            lista.forEach((item, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = `${item.nome} - R$ ${item.preco.toFixed(2).replace('.', ',')}`;
+                select.appendChild(option);
+            });
+            
+            document.getElementById("estoque-badge").classList.remove("hidden");
+            atualizarPreco();
+        }
+
+        function atualizarPreco() {
+            const indice = document.getElementById("produto").value;
+            if (indice === "" || indice === null) return;
+
+            const produto = produtos[indice];
+            if (produto) {
+                document.getElementById("preco").value = produto.preco.toFixed(2);
+                
+                const badgeEstoque = document.getElementById("estoque-badge");
+                const valorEstoque = document.getElementById("estoque-valor");
+                
+                badgeEstoque.classList.remove("hidden");
+                
+                if (produto.estoque !== undefined) {
+                    if (produto.estoque === "N/D" || produto.estoque === "") {
+                        valorEstoque.innerText = "Livre";
+                        badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full w-fit";
+                    } else {
+                        const estoqueNum = Number(produto.estoque);
+                        valorEstoque.innerText = estoqueNum + " un.";
+                        
+                        if (estoqueNum <= 0) {
+                            valorEstoque.innerText = "Esgotado";
+                            badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-red-700 bg-red-100 px-2.5 py-1 rounded-full w-fit font-bold";
+                        } else if (estoqueNum <= 5) {
+                            badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full w-fit font-bold";
+                        } else {
+                            badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full w-fit font-bold";
+                        }
+                    }
+                } else {
+                    valorEstoque.innerText = "Sem Dados";
+                    badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full w-fit";
+                }
+                calcularTotal();
+            }
+        }
+
+        function calcularTotal() {
+            let qtd = Number(document.getElementById("qtd").value);
+            if (qtd < 1) {
+                qtd = 1;
+                document.getElementById("qtd").value = 1;
+            }
+            const preco = Number(document.getElementById("preco").value) || 0;
+            const total = qtd * preco;
+            document.getElementById("total").innerText = total.toFixed(2).replace(".", ",");
+        }
+
+        function alterarQtd(valor) {
+            const input = document.getElementById("qtd");
+            let novaQtd = Number(input.value) + valor;
+            if (novaQtd < 1) novaQtd = 1;
+            input.value = novaQtd;
+            calcularTotal();
+        }
+
+        function setPagamento(opcao) {
+            document.getElementById('pagamento').value = opcao;
+            document.querySelectorAll('.pagamento-opcao').forEach(btn => {
+                btn.className = "pagamento-opcao py-3 px-1 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100/50 transition";
+            });
+
+            const btnAtivo = document.getElementById(`btn-${opcao.toLowerCase()}`);
+            if (btnAtivo) {
+                btnAtivo.className = "pagamento-opcao py-3 px-1 rounded-xl border-2 border-emerald-500 text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-800 transition shadow-sm";
+            }
+        }
+
+        // Envia a venda ao Google Sheets
+        async function salvarVenda() {
+            const indice = document.getElementById("produto").value;
+            if (indice === "" || indice === null) {
+                mostrarFeedback("erro", "Selecione o Produto", "Por favor, escolha um produto antes de registrar a venda.");
+                return;
+            }
+
+            const produto = produtos[indice];
+            const qtd = Number(document.getElementById("qtd").value);
+            const preco = Number(document.getElementById("preco").value);
+            const pagamento = document.getElementById("pagamento").value;
+            const local = document.getElementById("local").value;
+            const turno = document.getElementById("turno").value;
+            const vendedor = document.getElementById("vendedor").value;
+
+            if (produto.estoque !== undefined && produto.estoque !== "N/D" && produto.estoque !== "") {
+                const estoqueNum = Number(produto.estoque);
+                if (estoqueNum <= 0) {
+                    mostrarFeedback("erro", "Estoque Zerado", `Não é possível registrar. O estoque de "${produto.nome}" está esgotado.`);
+                    return;
+                }
+                if (qtd > estoqueNum) {
+                    mostrarFeedback("erro", "Estoque Insuficiente", `Estoque disponível: ${estoqueNum} unidades.`);
+                    return;
+                }
+            }
+
+            localStorage.setItem('ultimo_vendedor', vendedor);
+
+            const params = new URLSearchParams({
+                action: "salvar",
+                produto: produto.nome,
+                qtd: qtd,
+                preco: preco,
+                total: (qtd * preco).toFixed(2),
+                pagamento: pagamento,
+                local: local,
+                turno: turno,
+                vendedor: vendedor
+            });
+
+            mostrarFeedback("processando", "Registrando Venda", "Comunicando-se com a sua Planilha do Google...");
+
+            try {
+                const urlCompleta = `${googleWebAppUrl}?${params.toString()}`;
+                const resposta = await fetch(urlCompleta);
+                if (!resposta.ok) throw new Error("Erro HTTP");
+                
+                const resultado = await resposta.json();
+
+                if (resultado && resultado.sucesso) {
+                    mostrarFeedback("sucesso", "Venda Salva com Sucesso!", resultado.mensagem || "Os dados da venda foram gravados na planilha.");
+                    
+                    // Atualiza os dados após salvar
+                    await refreshDashboard();
+                    resetFormulario();
+                } else {
+                    mostrarFeedback("erro", "Erro na Planilha", resultado.mensagem || "O Script do Google retornou uma falha de salvamento.");
+                }
+            } catch (error) {
+                console.warn("Sem comunicação real. Atualizando gráficos localmente.");
+                executarVendaMockLocal(vendedor, qtd * preco);
+            }
+        }
+
+        function executarVendaMockLocal(vendedor, valor) {
+            const vendedorObj = dadosCarregados.vendedores.find(v => v.nome.toLowerCase() === vendedor.toLowerCase());
+            if (vendedorObj) {
+                vendedorObj.vendas += valor;
+            }
+
+            const ultimoDia = dadosCarregados.semanal[dadosCarregados.semanal.length - 1];
+            if (ultimoDia) {
+                ultimoDia.total += valor;
+                if (vendedor.toLowerCase() === 'lara') ultimoDia.lara += valor;
+                else if (vendedor.toLowerCase() === 'miqueias') ultimoDia.miqueias += valor;
+                else if (vendedor.toLowerCase() === 'klein') ultimoDia.klein += valor;
+            }
+
+            atualizarKPIs(dadosCarregados);
+            renderizarGraficoVendedores(dadosCarregados.vendedores);
+            renderizarGraficoTotal(dadosCarregados.semanal);
+            renderizarGraficoComparacao(dadosCarregados.semanal);
+
+            mostrarFeedback("sucesso", "Venda Registrada (Simulação)", "Venda adicionada ao Dashboard local com sucesso!");
+            resetFormulario();
+        }
+
+        function resetFormulario() {
+            document.getElementById("qtd").value = "1";
+            if (document.getElementById("produto").options.length > 0) {
+                document.getElementById("produto").selectedIndex = 0;
+            }
+            atualizarPreco();
+        }
+
+        // Carrega dados da aba DADOS_DASHBOARD no Google Sheets
+        async function carregarDashboard() {
+            if (!googleWebAppUrl) return;
+
+            try {
+                const resposta = await fetch(googleWebAppUrl + '?action=listarDashboard');
+                const dados = await resposta.json();
+                
+                if (dados && dados.sucesso && (dados.vendedores || dados.semanal)) {
+                    dadosCarregados = dados;
+                    atualizarKPIs(dados);
+                    renderizarGraficoVendedores(dados.vendedores);
+                    renderizarGraficoTotal(dados.semanal);
+                    renderizarGraficoComparacao(dados.semanal);
+                }
+            } catch (error) {
+                console.warn("Utilizando estrutura padrão de dados.");
+            }
+        }
+
+        // Atualização de KPIs
+        function atualizarKPIs(dados) {
+            if (!dados || !dados.semanal) return;
+
+            const faturamentoTotal = dados.semanal.reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0);
+            document.getElementById('kpi-total').textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            const mediaDiaria = faturamentoTotal / dados.semanal.length;
+            document.getElementById('kpi-media').textContent = mediaDiaria.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            let melhorVendedor = { nome: "Nenhum", vendas: 0 };
+            if (dados.vendedores && Array.isArray(dados.vendedores)) {
+                dados.vendedores.forEach(v => {
+                    if (parseFloat(v.vendas) > melhorVendedor.vendas) {
+                        melhorVendedor = { nome: v.nome, vendas: parseFloat(v.vendas) };
+                    }
+                });
+            }
+            document.getElementById('kpi-vendedor').textContent = melhorVendedor.nome;
+            document.getElementById('kpi-vendedor-vendas').innerHTML = `
+                <i data-lucide="award" class="w-3.5 h-3.5 text-brand-500"></i>
+                Líder com R$ ${melhorVendedor.vendas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} vendas
+            `;
+            lucide.createIcons();
+        }
+
+        // Gráfico 1: Vendedores
+        function renderizarGraficoVendedores(vendedores) {
+            if (!vendedores) return;
+            const ctx = document.getElementById("graficoVendedores").getContext("2d");
+            
+            if (chartVendedores) {
+                chartVendedores.destroy();
+            }
+
+            const backgroundColors = vendedores.map(v => {
+                const nome = v.nome.toLowerCase();
+                if (nome.includes('lara')) return palette.lara.solid;
+                if (nome.includes('miqueias')) return palette.miqueias.solid;
+                return palette.klein.solid;
+            });
+
+            chartVendedores = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: vendedores.map(v => v.nome),
+                    datasets: [{
+                        label: "Total Acumulado Semanal (R$)",
+                        data: vendedores.map(v => v.vendas),
+                        backgroundColor: backgroundColors,
+                        borderRadius: 12,
+                        borderWidth: 0,
+                        barThickness: 45
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#f8fafc',
+                            bodyColor: '#cbd5e1',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: context => ` Vendas: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                            ticks: {
+                                color: '#64748b',
+                                callback: value => 'R$ ' + value
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 2: Evolução Diária
+        function renderizarGraficoTotal(semanal) {
+            if (!semanal) return;
+            const ctx = document.getElementById("graficoTotal").getContext("2d");
+
+            if (chartTotal) {
+                chartTotal.destroy();
+            }
+
+            chartTotal = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: semanal.map(i => i.dia),
+                    datasets: [{
+                        label: "Faturamento Diário",
+                        data: semanal.map(i => i.total),
+                        borderColor: palette.total.border,
+                        backgroundColor: palette.total.fill,
+                        fill: true,
+                        tension: 0.35,
+                        borderWidth: 3.5,
+                        pointBackgroundColor: palette.total.border,
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            callbacks: {
+                                label: context => ` Faturamento: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                            ticks: {
+                                color: '#64748b',
+                                callback: value => 'R$ ' + value
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 3: Comparação de Vendedores
+        function renderizarGraficoComparacao(semanal) {
+            if (!semanal) return;
+            const ctx = document.getElementById("graficoComparacao").getContext("2d");
+
+            if (chartComparacao) {
+                chartComparacao.destroy();
+            }
+
+            chartComparacao = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: semanal.map(i => i.dia),
+                    datasets: [
+                        {
+                            label: "Lara",
+                            data: semanal.map(i => i.lara),
+                            backgroundColor: palette.lara.solid,
+                            borderRadius: 6,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.75
+                        },
+                        {
+                            label: "Miqueias",
+                            data: semanal.map(i => i.miqueias),
+                            backgroundColor: palette.miqueias.solid,
+                            borderRadius: 6,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.75
+                        },
+                        {
+                            label: "Klein",
+                            data: semanal.map(i => i.klein),
+                            backgroundColor: palette.klein.solid,
+                            borderRadius: 6,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.75
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#334155',
+                                font: { weight: '700', size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            callbacks: {
+                                label: context => ` ${context.dataset.label}: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                            ticks: {
+                                color: '#64748b',
+                                callback: value => 'R$ ' + value
+                            },
+                            beginAtZero: true
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Filtro Local para Isolar Desempenho
+        function filtrarComparativo(tipo) {
+            if (!dadosCarregados || !dadosCarregados.semanal) return;
+
+            const botoes = ['todos', 'lara', 'miqueias', 'klein'];
+            botoes.forEach(b => {
+                const el = document.getElementById(`btn-f-${b}`);
+                if (b === tipo) {
+                    el.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition";
+                } else {
+                    el.className = "px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+                }
+            });
+
+            const semanal = dadosCarregados.semanal;
+
+            if (tipo === 'todos') {
+                chartComparacao.data.datasets = [
+                    {
+                        label: "Lara",
+                        data: semanal.map(i => i.lara),
+                        backgroundColor: palette.lara.solid,
+                        borderRadius: 6
+                    },
+                    {
+                        label: "Miqueias",
+                        data: semanal.map(i => i.miqueias),
+                        backgroundColor: palette.miqueias.solid,
+                        borderRadius: 6
+                    },
+                    {
+                        label: "Klein",
+                        data: semanal.map(i => i.klein),
+                        backgroundColor: palette.klein.solid,
+                        borderRadius: 6
+                    }
+                ];
+            } else if (tipo === 'lara') {
+                chartComparacao.data.datasets = [{
+                    label: "Apenas Lara",
+                    data: semanal.map(i => i.lara),
+                    backgroundColor: palette.lara.solid,
+                    borderRadius: 8
+                }];
+            } else if (tipo === 'miqueias') {
+                chartComparacao.data.datasets = [{
+                    label: "Apenas Miqueias",
+                    data: semanal.map(i => i.miqueias),
+                    backgroundColor: palette.miqueias.solid,
+                    borderRadius: 8
+                }];
+            } else if (tipo === 'klein') {
+                chartComparacao.data.datasets = [{
+                    label: "Apenas Klein",
+                    data: semanal.map(i => i.klein),
+                    backgroundColor: palette.klein.solid,
+                    borderRadius: 8
+                }];
+            }
+
+            chartComparacao.update('active');
+        }
+
+        // Modais de Controle
+        function mostrarFeedback(tipo, titulo, mensagem) {
+            const modal = document.getElementById('modal-feedback');
+            const iconContainer = document.getElementById('feedback-icon-container');
+            const txtTitulo = document.getElementById('feedback-titulo');
+            const txtMensagem = document.getElementById('feedback-mensagem');
+            const btnFechar = document.getElementById('feedback-btn-fechar');
+
+            modal.classList.remove('hidden');
+            btnFechar.classList.add('hidden');
+            
+            txtTitulo.innerText = titulo;
+            txtMensagem.innerText = mensagem;
+
+            if (tipo === "processando") {
+                iconContainer.className = "w-16 h-16 mx-auto rounded-full bg-blue-50 text-blue-500 flex items-center justify-center animate-spin border border-blue-100";
+                iconContainer.innerHTML = `<i data-lucide="loader-2" class="w-8 h-8"></i>`;
+            } else if (tipo === "sucesso") {
+                iconContainer.className = "w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center scale-110 duration-300 border border-emerald-200";
+                iconContainer.innerHTML = `<i data-lucide="check-circle" class="w-8 h-8"></i>`;
+                btnFechar.classList.remove('hidden');
+                btnFechar.className = "w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-sm transition";
+            } else if (tipo === "erro") {
+                iconContainer.className = "w-16 h-16 mx-auto rounded-full bg-red-100 text-red-600 flex items-center justify-center scale-110 border border-red-200";
+                iconContainer.innerHTML = `<i data-lucide="x-circle" class="w-8 h-8"></i>`;
+                btnFechar.classList.remove('hidden');
+                btnFechar.className = "w-full py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-sm transition";
+            }
+            lucide.createIcons();
+        }
+
+        function fecharFeedback() {
+            document.getElementById('modal-feedback').classList.add('hidden');
+        }
+
+        function abrirConfiguracoes() {
+            document.getElementById('modal-config').classList.remove('hidden');
+        }
+
+        function fecharConfiguracoes() {
+            document.getElementById('modal-config').classList.add('hidden');
+        }
+
+        function salvarConfiguracoes() {
+            // A URL é fixa, então apenas mostramos um feedback
+            mostrarFeedback("sucesso", "URL Fixa", "A URL do Web App está configurada permanentemente.");
+        }
+
+        function limparConfiguracoes() {
+            // Não faz nada pois a URL é fixa
+            mostrarFeedback("sucesso", "Configuração Fixa", "A URL do Web App é permanente e não pode ser alterada.");
+        }
+    </script>
+</body>
+</html>

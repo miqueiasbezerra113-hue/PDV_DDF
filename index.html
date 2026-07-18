@@ -50,6 +50,20 @@
         .animate-spin-slow {
             animation: spin 1.5s linear infinite;
         }
+        .toggle-btn.active {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        .toggle-btn.active:hover {
+            background-color: #059669;
+        }
+        .toggle-btn {
+            transition: all 0.2s ease;
+        }
+        .bg-brand-50 { background-color: #f0f9ff; }
+        .text-brand-600 { color: #0ea5e9; }
+        .border-brand-100 { border-color: #e0f2fe; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
@@ -84,16 +98,13 @@
 
             <!-- Botões de Ação -->
             <div class="flex items-center gap-2">
-                <!-- Botão Refresh -->
                 <button onclick="refreshDashboard()" id="btn-refresh" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-600 relative" title="Atualizar Dados">
                     <i data-lucide="refresh-cw" class="w-5 h-5" id="refresh-icon"></i>
                     <span id="refresh-tooltip" class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity whitespace-nowrap pointer-events-none">Atualizar</span>
                 </button>
-                <!-- Botão Compartilhar -->
                 <button onclick="compartilharApp()" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-600 hidden md:inline-flex" title="Compartilhar App">
                     <i data-lucide="share-2" class="w-5 h-5"></i>
                 </button>
-                <!-- Botão Configurações -->
                 <button onclick="abrirConfiguracoes()" class="p-2 hover:bg-slate-100 rounded-xl transition text-slate-600 relative" title="Configurações">
                     <i data-lucide="settings" class="w-5 h-5"></i>
                     <span id="indicador-status" class="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
@@ -105,18 +116,16 @@
     <!-- Conteúdo Principal Dinâmico -->
     <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         
-        <!-- Alerta de Modo Offline / Configuração da Planilha -->
         <div id="alerta-conexao" class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-2xl flex items-start gap-3 text-sm mb-6 hidden">
             <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
             <div>
                 <p class="font-bold">Modo de Demonstração Ativo</p>
-                <p class="text-amber-700 text-xs mt-0.5">O sistema está rodando com dados fictícios de simulação. Clique no ícone de engrenagem no canto superior para conectar a sua própria planilha do Google Sheets.</p>
+                <p class="text-amber-700 text-xs mt-0.5">O sistema está rodando com dados fictícios de simulação.</p>
             </div>
         </div>
 
         <!-- ================= ABA 1: FRENTE DE CAIXA (PDV) ================= -->
         <section id="conteudo-pdv" class="max-w-md mx-auto space-y-6">
-            
             <div class="bg-white rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-100/40 p-6 space-y-5">
                 <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
                     <h2 class="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -127,9 +136,7 @@
                     </span>
                 </div>
 
-                <!-- Formulário do PDV -->
                 <div class="space-y-4">
-                    <!-- Produto -->
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Artigo / Produto</label>
                         <div class="relative">
@@ -140,15 +147,12 @@
                                 <i data-lucide="chevron-down" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        
-                        <!-- Mostrador de Estoque Atualizado Dinamicamente -->
                         <div id="estoque-badge" class="mt-2.5 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full w-fit hidden">
                             <i data-lucide="package" class="w-3.5 h-3.5"></i>
                             <span>Estoque: <span id="estoque-valor" class="font-bold">--</span></span>
                         </div>
                     </div>
 
-                    <!-- Quantidade e Preço Unitário lado a lado -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Quantidade</label>
@@ -158,7 +162,6 @@
                                 <button onclick="alterarQtd(1)" class="w-10 h-10 hover:bg-white rounded-xl flex items-center justify-center text-slate-600 font-bold active:scale-95 transition">+</button>
                             </div>
                         </div>
-
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Preço Unit.</label>
                             <div class="relative">
@@ -168,7 +171,6 @@
                         </div>
                     </div>
 
-                    <!-- Mostrador de Total Estilizado -->
                     <div class="bg-emerald-50/70 rounded-2xl border border-emerald-100 p-4 flex flex-col items-center justify-center my-3">
                         <span class="text-xs text-emerald-800 font-semibold uppercase tracking-wider mb-1">Valor Total da Venda</span>
                         <div class="text-3xl font-extrabold text-emerald-600 flex items-baseline gap-1">
@@ -177,7 +179,6 @@
                         </div>
                     </div>
 
-                    <!-- Forma de Pagamento -->
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Forma de Pagamento</label>
                         <div class="grid grid-cols-3 gap-2">
@@ -188,14 +189,12 @@
                         <input type="hidden" id="pagamento" value="PIX">
                     </div>
 
-                    <!-- Detalhes Extras (Local, Turno, Vendedor) -->
                     <div class="border-t border-slate-100 pt-4 space-y-4">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Local</label>
                                 <input id="local" value="IFCE" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium">
                             </div>
-
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Turno</label>
                                 <div class="relative">
@@ -210,8 +209,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Operador / Vendedor correspondente à planilha de Dashboard -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Vendedor / Operador</label>
                             <div class="relative">
@@ -228,12 +225,10 @@
                     </div>
                 </div>
 
-                <!-- Botão de Ação -->
                 <button id="btn-registrar" onclick="salvarVenda()" class="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-98">
                     <i data-lucide="send" class="w-5 h-5"></i> Registrar Venda
                 </button>
             </div>
-            
         </section>
 
         <!-- ================= ABA 2: PAINEL DE VENDAS (DASHBOARD) ================= -->
@@ -241,7 +236,6 @@
             
             <!-- Cards de KPI Dinâmicos -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- KPI 1: Faturamento Total -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
                     <div class="space-y-2">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Faturamento da Semana</p>
@@ -256,7 +250,6 @@
                     </div>
                 </div>
 
-                <!-- KPI 2: Vendedor Destaque -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
                     <div class="space-y-2">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Melhor Vendedor</p>
@@ -271,7 +264,6 @@
                     </div>
                 </div>
 
-                <!-- KPI 3: Média Diária -->
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all sm:col-span-2 lg:col-span-1">
                     <div class="space-y-2">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Média de Vendas</p>
@@ -287,80 +279,82 @@
                 </div>
             </div>
 
-            <!-- Gráficos Principais -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Gráfico 1: Vendedores Individual -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                        <div>
-                            <h3 class="font-bold text-slate-900">Vendas Consolidadas</h3>
-                            <p class="text-xs text-slate-500">Total acumulado na semana</p>
-                        </div>
-                        <span class="text-xs font-bold bg-brand-50 text-brand-600 px-2.5 py-1 rounded-full border border-brand-100">Semanal</span>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="graficoVendedores"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 2: Total por Dia -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                        <div>
-                            <h3 class="font-bold text-slate-900">Evolução Diária</h3>
-                            <p class="text-xs text-slate-500">Soma geral de vendas da semana</p>
-                        </div>
-                        <span class="text-xs font-bold bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full border border-emerald-100">Total Diário</span>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="graficoTotal"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gráficos de Produtos -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Gráfico 3: Vendas por Produto (G7:L12) -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm lg:col-span-2">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                        <div>
-                            <h3 class="font-bold text-slate-900">Vendas por Produto</h3>
-                            <p class="text-xs text-slate-500">Quantidade vendida por dia da semana</p>
-                        </div>
-                        <span class="text-xs font-bold bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full border border-purple-100">Produtos</span>
-                    </div>
-                    <div class="chart-container" style="height: 380px;">
-                        <canvas id="graficoProdutos"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Gráfico 4: Comparação de Vendedores Diário -->
+            <!-- GRÁFICO 1: TOTAL DIÁRIO (LINHA) - FATURAMENTO OU LUCRO -->
             <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
-                        <h3 class="font-bold text-slate-900">Acompanhamento de Vendedores</h3>
-                        <p class="text-xs text-slate-500">Vendas diárias detalhadas (Lara, Miqueias e Klein)</p>
+                        <h3 class="font-bold text-slate-900">Evolução Diária</h3>
+                        <p class="text-xs text-slate-500">Visualize o faturamento ou lucro total por dia</p>
                     </div>
-                    
-                    <!-- Filtros Rápidos -->
-                    <div class="bg-slate-100 p-1.5 rounded-2xl border border-slate-200 flex flex-wrap gap-1 w-fit">
-                        <button onclick="filtrarComparativo('todos')" id="btn-f-todos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">
-                            Todos
+                    <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                        <button onclick="toggleTotalView('faturamento')" id="btn-total-faturamento" class="toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">
+                            Faturamento
                         </button>
-                        <button onclick="filtrarComparativo('lara')" id="btn-f-lara" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-                            Lara
-                        </button>
-                        <button onclick="filtrarComparativo('miqueias')" id="btn-f-miqueias" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-                            Miqueias
-                        </button>
-                        <button onclick="filtrarComparativo('klein')" id="btn-f-klein" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-                            Klein
+                        <button onclick="toggleTotalView('lucro')" id="btn-total-lucro" class="toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                            Lucro
                         </button>
                     </div>
                 </div>
+                <div class="chart-container">
+                    <canvas id="graficoTotal"></canvas>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 2: ANÁLISE POR PRODUTO (BARRAS) -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-900">Análise por Produto</h3>
+                        <p class="text-xs text-slate-500">Visualize o faturamento ou lucro por produto</p>
+                    </div>
+                    <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                        <button onclick="toggleProdutoView('faturamento')" id="btn-produto-faturamento" class="toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">
+                            Faturamento
+                        </button>
+                        <button onclick="toggleProdutoView('lucro')" id="btn-produto-lucro" class="toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                            Lucro
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="graficoProdutos"></canvas>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 3: ANÁLISE POR VENDEDOR (BARRAS) -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-900">Análise por Vendedor</h3>
+                        <p class="text-xs text-slate-500">Visualize o faturamento ou lucro por vendedor</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                            <button onclick="toggleVendedorView('faturamento')" id="btn-vendedor-faturamento" class="toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">
+                                Faturamento
+                            </button>
+                            <button onclick="toggleVendedorView('lucro')" id="btn-vendedor-lucro" class="toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                                Lucro
+                            </button>
+                        </div>
+                        <div class="bg-slate-100 p-1 rounded-2xl border border-slate-200 flex flex-wrap gap-1">
+                            <button onclick="filtrarComparativo('todos')" id="btn-f-todos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">
+                                Todos
+                            </button>
+                            <button onclick="filtrarComparativo('lara')" id="btn-f-lara" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                                Lara
+                            </button>
+                            <button onclick="filtrarComparativo('miqueias')" id="btn-f-miqueias" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                                Miqueias
+                            </button>
+                            <button onclick="filtrarComparativo('klein')" id="btn-f-klein" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                                Klein
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div class="chart-container" style="height: 380px;">
-                    <canvas id="graficoComparacao"></canvas>
+                    <canvas id="graficoVendedores"></canvas>
                 </div>
             </div>
 
@@ -368,7 +362,7 @@
 
     </main>
 
-    <!-- Footer Geral -->
+    <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <div class="flex items-center gap-2">
@@ -379,7 +373,7 @@
         </div>
     </footer>
 
-    <!-- Modal de Configuração de API -->
+    <!-- Modais -->
     <div id="modal-config" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end justify-center sm:items-center p-4 hidden">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-xl border border-slate-100">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -390,23 +384,17 @@
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            
             <div class="space-y-3">
-                <p class="text-xs text-slate-500 leading-relaxed">
-                    A URL do Web App está fixa e conectada à sua planilha.
-                </p>
-                
+                <p class="text-xs text-slate-500 leading-relaxed">A URL do Web App está fixa e conectada à sua planilha.</p>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">URL do Web App (Fixa)</label>
                     <input type="text" id="config-url" readonly class="w-full bg-slate-100 border border-slate-200 text-slate-600 rounded-2xl px-3.5 py-3 text-xs font-medium cursor-not-allowed">
                 </div>
-
                 <div class="bg-green-50 border border-green-100 text-green-800 rounded-2xl p-4 text-xs leading-relaxed">
                     <strong class="flex items-center gap-1 mb-1"><i data-lucide="check-circle" class="w-4 h-4"></i>Conexão Ativa</strong>
                     O sistema está conectado à sua planilha do Google Sheets.
                 </div>
             </div>
-            
             <div class="flex gap-2.5 pt-2">
                 <button onclick="fecharConfiguracoes()" class="flex-1 py-3 border border-slate-200 text-slate-600 rounded-2xl text-sm font-semibold hover:bg-slate-50 transition">Fechar</button>
                 <button onclick="refreshDashboard(); fecharConfiguracoes();" class="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-sm font-semibold transition flex items-center justify-center gap-2">
@@ -416,41 +404,36 @@
         </div>
     </div>
 
-    <!-- Modal de Feedback -->
     <div id="modal-feedback" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-xs rounded-3xl p-6 text-center space-y-4 shadow-2xl border border-slate-100">
-            <div id="feedback-icon-container" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center">
-                <!-- Inserido dinamicamente via JS -->
-            </div>
+            <div id="feedback-icon-container" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center"></div>
             <div class="space-y-1">
                 <h4 id="feedback-titulo" class="font-bold text-lg text-slate-900">Processando</h4>
-                <p id="feedback-mensagem" class="text-sm text-slate-500">Enviando dados de venda para o Google Sheets...</p>
+                <p id="feedback-mensagem" class="text-sm text-slate-500">Enviando dados de venda...</p>
             </div>
-            <button id="feedback-btn-fechar" onclick="fecharFeedback()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition hidden">
-                Fechar
-            </button>
+            <button id="feedback-btn-fechar" onclick="fecharFeedback()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition hidden">Fechar</button>
         </div>
     </div>
 
-    <!-- Scripts de Lógica Integrada -->
     <script>
         // ============================================================
-        // URL FIXA DO WEB APP
+        // URL FIXA DO WEB APP (ATUALIZADA)
         // ============================================================
-        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycbyKJ8XI2-gBYs_1di9ae6EyP7iqJCSlf9BTNzf4wKEkYU4j9HO4ZsfCx_5zJVDkAE4KuQ/exec";
-        
-        // URL da API - usando a URL fixa
+        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycby42GDFINn8sRXRyTxSgEHufSbGAsd2xakzFUbnRaUwHrwIy3n22FrP9ZMr8MysNSbneQ/exec";
         let googleWebAppUrl = WEB_APP_URL_FIXA;
 
-        // Variáveis globais para instâncias do Chart.js
-        let chartVendedores = null;
+        // Variáveis globais
         let chartTotal = null;
-        let chartComparacao = null;
         let chartProdutos = null;
+        let chartVendedores = null;
         let dadosCarregados = null;
         let isRefreshing = false;
+        let viewTotalAtual = 'faturamento';
+        let viewProdutoAtual = 'faturamento';
+        let viewVendedorAtual = 'faturamento';
+        let filtroVendedorAtual = 'todos';
 
-        // Produtos Padrão/Offline de Simulação
+        // Produtos Padrão
         const produtosDemonstracao = [
             { nome: "BROWNIE CHOCOLATE", preco: 6.00, estoque: 15 },
             { nome: "BROWNIE LEITE NINHO", preco: 6.00, estoque: 4 },
@@ -464,25 +447,19 @@
 
         // Paleta de Cores
         const palette = {
-            lara: { solid: '#0ea5e9', border: '#0284c7', fill: 'rgba(14, 165, 233, 0.1)' },
-            miqueias: { solid: '#10b981', border: '#059669', fill: 'rgba(16, 185, 129, 0.1)' },
-            klein: { solid: '#a855f7', border: '#9333ea', fill: 'rgba(168, 85, 247, 0.1)' },
-            total: { border: '#6366f1', fill: 'rgba(99, 102, 241, 0.12)' }
+            lara: { solid: '#0ea5e9', border: '#0284c7' },
+            miqueias: { solid: '#10b981', border: '#059669' },
+            klein: { solid: '#a855f7', border: '#9333ea' },
+            total: { border: '#6366f1', fill: 'rgba(99, 102, 241, 0.12)' },
+            totalLucro: { border: '#f59e0b', fill: 'rgba(251, 191, 36, 0.12)' }
         };
 
-        // Cores para produtos (paleta expandida)
         const coresProdutos = [
-            '#ef4444', // Vermelho
-            '#f59e0b', // Amarelo
-            '#10b981', // Verde Esmeralda
-            '#3b82f6', // Azul
-            '#8b5cf6', // Roxo
-            '#ec4899', // Rosa
-            '#14b8a6', // Teal
-            '#f97316'  // Laranja
+            '#ef4444', '#f59e0b', '#10b981', '#3b82f6', 
+            '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'
         ];
 
-        // Dados Locais em caso de Erro de Rede ou Offline
+        // Dados Mock
         const mockDadosIniciais = {
             vendedores: [
                 { nome: "Miqueias", vendas: 3800 },
@@ -497,74 +474,46 @@
                 { dia: "Sexta", total: 2700, lara: 1000, miqueias: 900, klein: 800 }
             ],
             produtos: [
-                {
-                    nome: "BROWNIE CHOCOLATE",
-                    vendas: [
-                        { dia: "Segunda", quantidade: 5 },
-                        { dia: "Terça", quantidade: 8 },
-                        { dia: "Quarta", quantidade: 6 },
-                        { dia: "Quinta", quantidade: 10 },
-                        { dia: "Sexta", quantidade: 12 }
-                    ]
-                },
-                {
-                    nome: "BROWNIE LEITE NINHO",
-                    vendas: [
-                        { dia: "Segunda", quantidade: 3 },
-                        { dia: "Terça", quantidade: 5 },
-                        { dia: "Quarta", quantidade: 4 },
-                        { dia: "Quinta", quantidade: 7 },
-                        { dia: "Sexta", quantidade: 9 }
-                    ]
-                },
-                {
-                    nome: "CAFÉ",
-                    vendas: [
-                        { dia: "Segunda", quantidade: 20 },
-                        { dia: "Terça", quantidade: 25 },
-                        { dia: "Quarta", quantidade: 22 },
-                        { dia: "Quinta", quantidade: 28 },
-                        { dia: "Sexta", quantidade: 30 }
-                    ]
-                }
+                { nome: "BROWNIE CHOCOLATE", vendas: [{ dia: "Segunda", valor: 30 }, { dia: "Terça", valor: 48 }, { dia: "Quarta", valor: 36 }, { dia: "Quinta", valor: 60 }, { dia: "Sexta", valor: 72 }] },
+                { nome: "BROWNIE LEITE NINHO", vendas: [{ dia: "Segunda", valor: 18 }, { dia: "Terça", valor: 30 }, { dia: "Quarta", valor: 24 }, { dia: "Quinta", valor: 42 }, { dia: "Sexta", valor: 54 }] },
+                { nome: "CAFÉ", vendas: [{ dia: "Segunda", valor: 40 }, { dia: "Terça", valor: 50 }, { dia: "Quarta", valor: 44 }, { dia: "Quinta", valor: 56 }, { dia: "Sexta", valor: 60 }] }
+            ],
+            lucroSemanal: [
+                { dia: "Segunda", total: 500, lara: 200, miqueias: 150, klein: 150 },
+                { dia: "Terça", total: 600, lara: 250, miqueias: 200, klein: 150 },
+                { dia: "Quarta", total: 650, lara: 250, miqueias: 200, klein: 200 },
+                { dia: "Quinta", total: 700, lara: 300, miqueias: 200, klein: 200 },
+                { dia: "Sexta", total: 800, lara: 300, miqueias: 250, klein: 250 }
+            ],
+            lucroProdutos: [
+                { nome: "BROWNIE CHOCOLATE", lucro: [{ dia: "Segunda", valor: 30 }, { dia: "Terça", valor: 48 }, { dia: "Quarta", valor: 36 }, { dia: "Quinta", valor: 60 }, { dia: "Sexta", valor: 72 }] },
+                { nome: "BROWNIE LEITE NINHO", lucro: [{ dia: "Segunda", valor: 18 }, { dia: "Terça", valor: 30 }, { dia: "Quarta", valor: 24 }, { dia: "Quinta", valor: 42 }, { dia: "Sexta", valor: 54 }] },
+                { nome: "CAFÉ", lucro: [{ dia: "Segunda", valor: 100 }, { dia: "Terça", valor: 125 }, { dia: "Quarta", valor: 110 }, { dia: "Quinta", valor: 140 }, { dia: "Sexta", valor: 150 }] }
             ]
         };
 
         // ============================================================
-        // FUNÇÃO DE REFRESH - ATUALIZA TODOS OS DADOS
+        // FUNÇÃO DE REFRESH
         // ============================================================
         async function refreshDashboard() {
             if (isRefreshing) return;
-            
             isRefreshing = true;
-            const btnRefresh = document.getElementById('btn-refresh');
             const refreshIcon = document.getElementById('refresh-icon');
-            
-            // Animação de carregamento
             refreshIcon.className = "w-5 h-5 animate-spin-slow";
             refreshIcon.setAttribute('data-lucide', 'loader-2');
             lucide.createIcons();
             
             try {
-                // Atualiza produtos e dashboard simultaneamente
-                await Promise.all([
-                    carregarProdutosDoGoogle(),
-                    carregarDashboard()
-                ]);
-                
-                // Atualiza status
+                await Promise.all([carregarProdutosDoGoogle(), carregarDashboard()]);
                 document.getElementById('status-text').textContent = 'Dados atualizados!';
                 setTimeout(() => {
                     document.getElementById('status-text').textContent = 'Monitor de Vendas e Dashboard';
                 }, 2000);
-                
-                mostrarFeedback("sucesso", "Dados Atualizados!", "O Dashboard e os produtos foram recarregados com sucesso!");
-                
+                mostrarFeedback("sucesso", "Dados Atualizados!", "O Dashboard foi recarregado com sucesso!");
             } catch (error) {
                 console.error('Erro ao atualizar:', error);
-                mostrarFeedback("erro", "Erro ao Atualizar", "Não foi possível carregar os dados. Verifique sua conexão.");
+                mostrarFeedback("erro", "Erro ao Atualizar", "Não foi possível carregar os dados.");
             } finally {
-                // Restaura o ícone
                 refreshIcon.className = "w-5 h-5";
                 refreshIcon.setAttribute('data-lucide', 'refresh-cw');
                 lucide.createIcons();
@@ -577,13 +526,10 @@
         // ============================================================
         window.addEventListener('load', () => {
             lucide.createIcons();
-
-            // Configura URL fixa no campo de configuração
             document.getElementById('config-url').value = WEB_APP_URL_FIXA;
             document.getElementById('indicador-status').className = "absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white";
             document.getElementById('alerta-conexao').classList.add('hidden');
             
-            // Carrega dados
             carregarProdutosDoGoogle();
             carregarDashboard();
 
@@ -596,27 +542,73 @@
 
             dadosCarregados = mockDadosIniciais;
             atualizarKPIs(dadosCarregados);
-            renderizarGraficoVendedores(dadosCarregados.vendedores);
-            renderizarGraficoTotal(dadosCarregados.semanal);
-            renderizarGraficoComparacao(dadosCarregados.semanal);
-            renderizarGraficoProdutos(dadosCarregados.produtos);
+            renderizarGraficoTotal('faturamento');
+            renderizarGraficoProdutos('faturamento');
+            renderizarGraficoVendedores('faturamento');
 
-            // Tooltip do botão refresh
             const btnRefresh = document.getElementById('btn-refresh');
             const tooltip = document.getElementById('refresh-tooltip');
-            btnRefresh.addEventListener('mouseenter', () => {
-                tooltip.classList.remove('opacity-0');
-            });
-            btnRefresh.addEventListener('mouseleave', () => {
-                tooltip.classList.add('opacity-0');
-            });
+            btnRefresh.addEventListener('mouseenter', () => tooltip.classList.remove('opacity-0'));
+            btnRefresh.addEventListener('mouseleave', () => tooltip.classList.add('opacity-0'));
         });
 
         // ============================================================
-        // DEMAIS FUNÇÕES
+        // FUNÇÕES DE ALTERNÂNCIA (TOGGLE)
         // ============================================================
-        
-        // Alternância de Abas
+        function toggleTotalView(view) {
+            viewTotalAtual = view;
+            
+            const btnFat = document.getElementById('btn-total-faturamento');
+            const btnLucro = document.getElementById('btn-total-lucro');
+            
+            btnFat.className = view === 'faturamento' 
+                ? "toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+                : "toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+            
+            btnLucro.className = view === 'lucro'
+                ? "toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+                : "toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+            
+            renderizarGraficoTotal(view);
+        }
+
+        function toggleProdutoView(view) {
+            viewProdutoAtual = view;
+            
+            const btnFat = document.getElementById('btn-produto-faturamento');
+            const btnLucro = document.getElementById('btn-produto-lucro');
+            
+            btnFat.className = view === 'faturamento' 
+                ? "toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+                : "toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+            
+            btnLucro.className = view === 'lucro'
+                ? "toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+                : "toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+            
+            renderizarGraficoProdutos(view);
+        }
+
+        function toggleVendedorView(view) {
+            viewVendedorAtual = view;
+            
+            const btnFat = document.getElementById('btn-vendedor-faturamento');
+            const btnLucro = document.getElementById('btn-vendedor-lucro');
+            
+            btnFat.className = view === 'faturamento'
+                ? "toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+                : "toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+            
+            btnLucro.className = view === 'lucro'
+                ? "toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+                : "toggle-btn px-4 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+            
+            renderizarGraficoVendedores(view);
+        }
+
+        // ============================================================
+        // FUNÇÕES DE NAVEGAÇÃO
+        // ============================================================
         function alternarAba(aba) {
             const pdvTab = document.getElementById('tab-pdv');
             const dashTab = document.getElementById('tab-dashboard');
@@ -633,12 +625,10 @@
                 pdvTab.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900";
                 pdvContent.classList.add('hidden');
                 dashContent.classList.remove('hidden');
-                
                 setTimeout(() => {
-                    if (chartVendedores) chartVendedores.resize();
                     if (chartTotal) chartTotal.resize();
-                    if (chartComparacao) chartComparacao.resize();
                     if (chartProdutos) chartProdutos.resize();
+                    if (chartVendedores) chartVendedores.resize();
                 }, 50);
             }
         }
@@ -649,33 +639,29 @@
             tempInput.value = shareUrl;
             document.body.appendChild(tempInput);
             tempInput.select();
-            
             try {
-                const copiado = document.execCommand("copy");
-                if (copiado) {
-                    mostrarFeedback("sucesso", "Link Copiado!", "O link de acesso do aplicativo foi copiado para a área de transferência.");
-                } else {
-                    throw new Error("Erro");
-                }
+                document.execCommand("copy");
+                mostrarFeedback("sucesso", "Link Copiado!", "O link foi copiado para a área de transferência.");
             } catch (err) {
-                mostrarFeedback("sucesso", "Link do App", "Copie o link abaixo para compartilhar:\n" + shareUrl);
+                mostrarFeedback("sucesso", "Link do App", "Copie o link: " + shareUrl);
             }
             document.body.removeChild(tempInput);
         }
 
-        // Carrega produtos vindos da planilha
+        // ============================================================
+        // FUNÇÕES DE PRODUTOS E ESTOQUE
+        // ============================================================
         async function carregarProdutosDoGoogle() {
             if (!googleWebAppUrl) return;
             try {
                 const resposta = await fetch(googleWebAppUrl + '?action=listarProdutos');
                 if (!resposta.ok) throw new Error();
                 const json = await resposta.json();
-                
                 if (json.sucesso && Array.isArray(json.dados)) {
                     montarListaProdutos(json.dados);
                 }
             } catch (error) {
-                console.warn("Falha ao obter produtos do Google Sheets. Usando demonstração.");
+                console.warn("Falha ao obter produtos. Usando demonstração.");
                 montarListaProdutos(produtosDemonstracao);
             }
         }
@@ -684,14 +670,12 @@
             produtos = lista;
             const select = document.getElementById("produto");
             select.innerHTML = "";
-            
             lista.forEach((item, index) => {
                 const option = document.createElement("option");
                 option.value = index;
                 option.textContent = `${item.nome} - R$ ${item.preco.toFixed(2).replace('.', ',')}`;
                 select.appendChild(option);
             });
-            
             document.getElementById("estoque-badge").classList.remove("hidden");
             atualizarPreco();
         }
@@ -699,16 +683,12 @@
         function atualizarPreco() {
             const indice = document.getElementById("produto").value;
             if (indice === "" || indice === null) return;
-
             const produto = produtos[indice];
             if (produto) {
                 document.getElementById("preco").value = produto.preco.toFixed(2);
-                
                 const badgeEstoque = document.getElementById("estoque-badge");
                 const valorEstoque = document.getElementById("estoque-valor");
-                
                 badgeEstoque.classList.remove("hidden");
-                
                 if (produto.estoque !== undefined) {
                     if (produto.estoque === "N/D" || produto.estoque === "") {
                         valorEstoque.innerText = "Livre";
@@ -716,7 +696,6 @@
                     } else {
                         const estoqueNum = Number(produto.estoque);
                         valorEstoque.innerText = estoqueNum + " un.";
-                        
                         if (estoqueNum <= 0) {
                             valorEstoque.innerText = "Esgotado";
                             badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-red-700 bg-red-100 px-2.5 py-1 rounded-full w-fit font-bold";
@@ -736,10 +715,7 @@
 
         function calcularTotal() {
             let qtd = Number(document.getElementById("qtd").value);
-            if (qtd < 1) {
-                qtd = 1;
-                document.getElementById("qtd").value = 1;
-            }
+            if (qtd < 1) { qtd = 1; document.getElementById("qtd").value = 1; }
             const preco = Number(document.getElementById("preco").value) || 0;
             const total = qtd * preco;
             document.getElementById("total").innerText = total.toFixed(2).replace(".", ",");
@@ -758,14 +734,15 @@
             document.querySelectorAll('.pagamento-opcao').forEach(btn => {
                 btn.className = "pagamento-opcao py-3 px-1 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100/50 transition";
             });
-
             const btnAtivo = document.getElementById(`btn-${opcao.toLowerCase()}`);
             if (btnAtivo) {
                 btnAtivo.className = "pagamento-opcao py-3 px-1 rounded-xl border-2 border-emerald-500 text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-800 transition shadow-sm";
             }
         }
 
-        // Envia a venda ao Google Sheets
+        // ============================================================
+        // FUNÇÃO SALVAR VENDA
+        // ============================================================
         async function salvarVenda() {
             const indice = document.getElementById("produto").value;
             if (indice === "" || indice === null) {
@@ -813,13 +790,10 @@
                 const urlCompleta = `${googleWebAppUrl}?${params.toString()}`;
                 const resposta = await fetch(urlCompleta);
                 if (!resposta.ok) throw new Error("Erro HTTP");
-                
                 const resultado = await resposta.json();
 
                 if (resultado && resultado.sucesso) {
                     mostrarFeedback("sucesso", "Venda Salva com Sucesso!", resultado.mensagem || "Os dados da venda foram gravados na planilha.");
-                    
-                    // Atualiza os dados após salvar
                     await refreshDashboard();
                     resetFormulario();
                 } else {
@@ -836,7 +810,6 @@
             if (vendedorObj) {
                 vendedorObj.vendas += valor;
             }
-
             const ultimoDia = dadosCarregados.semanal[dadosCarregados.semanal.length - 1];
             if (ultimoDia) {
                 ultimoDia.total += valor;
@@ -844,13 +817,10 @@
                 else if (vendedor.toLowerCase() === 'miqueias') ultimoDia.miqueias += valor;
                 else if (vendedor.toLowerCase() === 'klein') ultimoDia.klein += valor;
             }
-
             atualizarKPIs(dadosCarregados);
-            renderizarGraficoVendedores(dadosCarregados.vendedores);
-            renderizarGraficoTotal(dadosCarregados.semanal);
-            renderizarGraficoComparacao(dadosCarregados.semanal);
-            renderizarGraficoProdutos(dadosCarregados.produtos);
-
+            renderizarGraficoTotal(viewTotalAtual);
+            renderizarGraficoProdutos(viewProdutoAtual);
+            renderizarGraficoVendedores(viewVendedorAtual);
             mostrarFeedback("sucesso", "Venda Registrada (Simulação)", "Venda adicionada ao Dashboard local com sucesso!");
             resetFormulario();
         }
@@ -863,37 +833,35 @@
             atualizarPreco();
         }
 
-        // Carrega dados da aba DADOS_DASHBOARD no Google Sheets
+        // ============================================================
+        // FUNÇÃO CARREGAR DASHBOARD
+        // ============================================================
         async function carregarDashboard() {
             if (!googleWebAppUrl) return;
-
             try {
                 const resposta = await fetch(googleWebAppUrl + '?action=listarDashboard');
                 const dados = await resposta.json();
-                
-                if (dados && dados.sucesso && (dados.vendedores || dados.semanal)) {
+                if (dados && dados.sucesso) {
                     dadosCarregados = dados;
                     atualizarKPIs(dados);
-                    renderizarGraficoVendedores(dados.vendedores);
-                    renderizarGraficoTotal(dados.semanal);
-                    renderizarGraficoComparacao(dados.semanal);
-                    renderizarGraficoProdutos(dados.produtos);
+                    renderizarGraficoTotal(viewTotalAtual);
+                    renderizarGraficoProdutos(viewProdutoAtual);
+                    renderizarGraficoVendedores(viewVendedorAtual);
                 }
             } catch (error) {
                 console.warn("Utilizando estrutura padrão de dados.");
             }
         }
 
-        // Atualização de KPIs
+        // ============================================================
+        // ATUALIZAÇÃO DE KPIs
+        // ============================================================
         function atualizarKPIs(dados) {
             if (!dados || !dados.semanal) return;
-
             const faturamentoTotal = dados.semanal.reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0);
             document.getElementById('kpi-total').textContent = faturamentoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
             const mediaDiaria = faturamentoTotal / dados.semanal.length;
             document.getElementById('kpi-media').textContent = mediaDiaria.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
             let melhorVendedor = { nome: "Nenhum", vendas: 0 };
             if (dados.vendedores && Array.isArray(dados.vendedores)) {
                 dados.vendedores.forEach(v => {
@@ -910,90 +878,53 @@
             lucide.createIcons();
         }
 
-        // Gráfico 1: Vendedores
-        function renderizarGraficoVendedores(vendedores) {
-            if (!vendedores) return;
-            const ctx = document.getElementById("graficoVendedores").getContext("2d");
+        // ============================================================
+        // GRÁFICO 1: TOTAL DIÁRIO (LINHA)
+        // ============================================================
+        function renderizarGraficoTotal(view) {
+            const dados = dadosCarregados || mockDadosIniciais;
             
-            if (chartVendedores) {
-                chartVendedores.destroy();
+            let dadosTotal;
+            let label;
+            let cor;
+            let tituloY;
+            let tooltipLabel;
+
+            if (view === 'faturamento') {
+                dadosTotal = dados.semanal || [];
+                label = 'Faturamento Total';
+                cor = palette.total;
+                tituloY = 'Faturamento (R$)';
+                tooltipLabel = 'R$ ';
+            } else {
+                dadosTotal = dados.lucroSemanal || [];
+                label = 'Lucro Total';
+                cor = palette.totalLucro;
+                tituloY = 'Lucro (R$)';
+                tooltipLabel = 'R$ ';
             }
 
-            const backgroundColors = vendedores.map(v => {
-                const nome = v.nome.toLowerCase();
-                if (nome.includes('lara')) return palette.lara.solid;
-                if (nome.includes('miqueias')) return palette.miqueias.solid;
-                return palette.klein.solid;
-            });
+            if (!dadosTotal || dadosTotal.length === 0) {
+                console.warn("Sem dados para exibir");
+                return;
+            }
 
-            chartVendedores = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: vendedores.map(v => v.nome),
-                    datasets: [{
-                        label: "Total Acumulado Semanal (R$)",
-                        data: vendedores.map(v => v.vendas),
-                        backgroundColor: backgroundColors,
-                        borderRadius: 12,
-                        borderWidth: 0,
-                        barThickness: 45
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            titleColor: '#f8fafc',
-                            bodyColor: '#cbd5e1',
-                            borderColor: '#334155',
-                            borderWidth: 1,
-                            callbacks: {
-                                label: context => ` Vendas: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
-                            ticks: {
-                                color: '#64748b',
-                                callback: value => 'R$ ' + value
-                            }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#64748b', font: { weight: '600' } }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Gráfico 2: Evolução Diária
-        function renderizarGraficoTotal(semanal) {
-            if (!semanal) return;
             const ctx = document.getElementById("graficoTotal").getContext("2d");
-
-            if (chartTotal) {
-                chartTotal.destroy();
-            }
+            if (chartTotal) chartTotal.destroy();
 
             chartTotal = new Chart(ctx, {
                 type: "line",
                 data: {
-                    labels: semanal.map(i => i.dia),
+                    labels: dadosTotal.map(i => i.dia),
                     datasets: [{
-                        label: "Faturamento Diário",
-                        data: semanal.map(i => i.total),
-                        borderColor: palette.total.border,
-                        backgroundColor: palette.total.fill,
+                        label: label,
+                        data: dadosTotal.map(i => i.total || 0),
+                        borderColor: cor.border,
+                        backgroundColor: cor.fill,
                         fill: true,
                         tension: 0.35,
                         borderWidth: 3.5,
-                        pointBackgroundColor: palette.total.border,
+                        pointBackgroundColor: cor.border,
                         pointBorderColor: '#ffffff',
                         pointBorderWidth: 2,
                         pointRadius: 6,
@@ -1004,21 +935,23 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false },
+                        legend: { display: true },
                         tooltip: {
                             backgroundColor: '#1e293b',
                             callbacks: {
-                                label: context => ` Faturamento: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                                label: context => ` ${context.dataset.label}: ${tooltipLabel}${context.raw.toFixed(2)}`
                             }
                         }
                     },
                     scales: {
                         y: {
                             grid: { color: 'rgba(226, 232, 240, 0.8)' },
-                            ticks: {
-                                color: '#64748b',
+                            ticks: { 
+                                color: '#64748b', 
                                 callback: value => 'R$ ' + value
-                            }
+                            },
+                            beginAtZero: true,
+                            title: { display: true, text: tituloY, color: '#64748b' }
                         },
                         x: {
                             grid: { display: false },
@@ -1029,28 +962,52 @@
             });
         }
 
-        // Gráfico 3: Vendas por Produto (NOVO)
-        function renderizarGraficoProdutos(produtosData) {
-            if (!produtosData || produtosData.length === 0) return;
+        // ============================================================
+        // GRÁFICO 2: PRODUTOS (BARRAS)
+        // ============================================================
+        function renderizarGraficoProdutos(view) {
+            const dados = dadosCarregados || mockDadosIniciais;
             
-            const ctx = document.getElementById("graficoProdutos").getContext("2d");
+            let dadosProdutos;
+            let label;
+            let tituloY;
+            let tooltipLabel;
 
-            if (chartProdutos) {
-                chartProdutos.destroy();
+            if (view === 'faturamento') {
+                dadosProdutos = dados.produtos || [];
+                label = 'Faturamento';
+                tituloY = 'Faturamento (R$)';
+                tooltipLabel = 'R$ ';
+            } else {
+                dadosProdutos = dados.lucroProdutos || [];
+                label = 'Lucro';
+                tituloY = 'Lucro (R$)';
+                tooltipLabel = 'R$ ';
             }
 
-            // Pega os dias da semana do primeiro produto
-            const dias = produtosData[0]?.vendas.map(v => v.dia) || ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+            if (!dadosProdutos || dadosProdutos.length === 0) {
+                console.warn("Sem dados para exibir");
+                return;
+            }
 
-            // Cria datasets para cada produto
-            const datasets = produtosData.map((produto, index) => {
+            const ctx = document.getElementById("graficoProdutos").getContext("2d");
+            if (chartProdutos) chartProdutos.destroy();
+
+            const dias = dadosProdutos[0]?.vendas?.map(v => v.dia) || 
+                        dadosProdutos[0]?.lucro?.map(v => v.dia) || 
+                        ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+
+            const datasets = dadosProdutos.map((produto, index) => {
                 const cor = coresProdutos[index % coresProdutos.length];
+                const data = view === 'faturamento' 
+                    ? (produto.vendas?.map(v => v.valor || 0) || [])
+                    : (produto.lucro?.map(v => v.valor || 0) || []);
                 return {
                     label: produto.nome,
-                    data: produto.vendas.map(v => v.quantidade || 0),
-                    backgroundColor: cor, // 50% de opacidade
+                    data: data,
+                    backgroundColor: cor,
                     borderColor: cor,
-                    borderWidth: 0,
+                    borderWidth: 2,
                     borderRadius: 6,
                     barPercentage: 0.8,
                     categoryPercentage: 0.7
@@ -1059,135 +1016,160 @@
 
             chartProdutos = new Chart(ctx, {
                 type: "bar",
-                data: {
-                    labels: dias,
-                    datasets: datasets
-                },
+                data: { labels: dias, datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: {
-                                color: '#334155',
-                                font: { weight: '700', size: 12 }
-                            }
+                            labels: { color: '#334155', font: { weight: '700', size: 12 } }
                         },
                         tooltip: {
                             backgroundColor: '#1e293b',
                             callbacks: {
-                                label: context => ` ${context.dataset.label}: ${context.raw} unidades`
+                                label: context => ` ${context.dataset.label}: ${tooltipLabel}${context.raw.toFixed(2)}`
                             }
                         }
                     },
                     scales: {
                         y: {
                             grid: { color: 'rgba(226, 232, 240, 0.8)' },
-                            ticks: {
-                                color: '#64748b',
-                                stepSize: 1
-                            },
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Quantidade Vendida',
-                                color: '#64748b'
-                            }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#64748b', font: { weight: '600' } }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Gráfico 4: Comparação de Vendedores
-        function renderizarGraficoComparacao(semanal) {
-            if (!semanal) return;
-            const ctx = document.getElementById("graficoComparacao").getContext("2d");
-
-            if (chartComparacao) {
-                chartComparacao.destroy();
-            }
-
-            chartComparacao = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: semanal.map(i => i.dia),
-                    datasets: [
-                        {
-                            label: "Lara",
-                            data: semanal.map(i => i.lara),
-                            backgroundColor: palette.lara.solid,
-                            borderRadius: 6,
-                            barPercentage: 0.8,
-                            categoryPercentage: 0.75
-                        },
-                        {
-                            label: "Miqueias",
-                            data: semanal.map(i => i.miqueias),
-                            backgroundColor: palette.miqueias.solid,
-                            borderRadius: 6,
-                            barPercentage: 0.8,
-                            categoryPercentage: 0.75
-                        },
-                        {
-                            label: "Klein",
-                            data: semanal.map(i => i.klein),
-                            backgroundColor: palette.klein.solid,
-                            borderRadius: 6,
-                            barPercentage: 0.8,
-                            categoryPercentage: 0.75
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#334155',
-                                font: { weight: '700', size: 12 }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            callbacks: {
-                                label: context => ` ${context.dataset.label}: R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
-                            ticks: {
-                                color: '#64748b',
+                            ticks: { 
+                                color: '#64748b', 
                                 callback: value => 'R$ ' + value
                             },
-                            beginAtZero: true
+                            beginAtZero: true,
+                            title: { display: true, text: tituloY, color: '#64748b' }
                         },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#64748b', font: { weight: '600' } }
-                        }
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { weight: '600' } } }
                     }
                 }
             });
         }
 
-        // Filtro Local para Isolar Desempenho
-        function filtrarComparativo(tipo) {
-            if (!dadosCarregados || !dadosCarregados.semanal) return;
+        // ============================================================
+        // GRÁFICO 3: VENDEDORES (BARRAS)
+        // ============================================================
+        function renderizarGraficoVendedores(view) {
+            const dados = dadosCarregados || mockDadosIniciais;
+            
+            let dadosVendedores;
+            let tituloY;
+            let tooltipLabel;
 
+            if (view === 'faturamento') {
+                dadosVendedores = dados.semanal || [];
+                tituloY = 'Faturamento (R$)';
+                tooltipLabel = 'R$ ';
+            } else {
+                dadosVendedores = dados.lucroSemanal || [];
+                tituloY = 'Lucro (R$)';
+                tooltipLabel = 'R$ ';
+            }
+
+            if (!dadosVendedores || dadosVendedores.length === 0) {
+                console.warn("Sem dados para exibir");
+                return;
+            }
+
+            const ctx = document.getElementById("graficoVendedores").getContext("2d");
+            if (chartVendedores) chartVendedores.destroy();
+
+            const labels = dadosVendedores.map(i => i.dia);
+            
+            let datasets = [];
+            
+            if (filtroVendedorAtual === 'todos') {
+                datasets = [
+                    {
+                        label: "Lara",
+                        data: dadosVendedores.map(i => i.lara || 0),
+                        backgroundColor: palette.lara.solid,
+                        borderColor: palette.lara.border,
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.75
+                    },
+                    {
+                        label: "Miqueias",
+                        data: dadosVendedores.map(i => i.miqueias || 0),
+                        backgroundColor: palette.miqueias.solid,
+                        borderColor: palette.miqueias.border,
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.75
+                    },
+                    {
+                        label: "Klein",
+                        data: dadosVendedores.map(i => i.klein || 0),
+                        backgroundColor: palette.klein.solid,
+                        borderColor: palette.klein.border,
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.75
+                    }
+                ];
+            } else {
+                let labelVendedor = filtroVendedorAtual.charAt(0).toUpperCase() + filtroVendedorAtual.slice(1);
+                let cor = filtroVendedorAtual === 'lara' ? palette.lara.solid : 
+                          filtroVendedorAtual === 'miqueias' ? palette.miqueias.solid : palette.klein.solid;
+                
+                datasets = [{
+                    label: labelVendedor,
+                    data: dadosVendedores.map(i => i[filtroVendedorAtual] || 0),
+                    backgroundColor: cor,
+                    borderColor: cor,
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.75
+                }];
+            }
+
+            chartVendedores = new Chart(ctx, {
+                type: "bar",
+                data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#334155', font: { weight: '700', size: 12 } }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            callbacks: {
+                                label: context => ` ${context.dataset.label}: ${tooltipLabel}${context.raw.toFixed(2)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                            ticks: { 
+                                color: '#64748b', 
+                                callback: value => 'R$ ' + value
+                            },
+                            beginAtZero: true,
+                            title: { display: true, text: tituloY, color: '#64748b' }
+                        },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { weight: '600' } } }
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        // FUNÇÃO DE FILTRO
+        // ============================================================
+        function filtrarComparativo(tipo) {
+            filtroVendedorAtual = tipo;
+            
             const botoes = ['todos', 'lara', 'miqueias', 'klein'];
             botoes.forEach(b => {
                 const el = document.getElementById(`btn-f-${b}`);
@@ -1197,70 +1179,23 @@
                     el.className = "px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition";
                 }
             });
-
-            const semanal = dadosCarregados.semanal;
-
-            if (tipo === 'todos') {
-                chartComparacao.data.datasets = [
-                    {
-                        label: "Lara",
-                        data: semanal.map(i => i.lara),
-                        backgroundColor: palette.lara.solid,
-                        borderRadius: 6
-                    },
-                    {
-                        label: "Miqueias",
-                        data: semanal.map(i => i.miqueias),
-                        backgroundColor: palette.miqueias.solid,
-                        borderRadius: 6
-                    },
-                    {
-                        label: "Klein",
-                        data: semanal.map(i => i.klein),
-                        backgroundColor: palette.klein.solid,
-                        borderRadius: 6
-                    }
-                ];
-            } else if (tipo === 'lara') {
-                chartComparacao.data.datasets = [{
-                    label: "Apenas Lara",
-                    data: semanal.map(i => i.lara),
-                    backgroundColor: palette.lara.solid,
-                    borderRadius: 8
-                }];
-            } else if (tipo === 'miqueias') {
-                chartComparacao.data.datasets = [{
-                    label: "Apenas Miqueias",
-                    data: semanal.map(i => i.miqueias),
-                    backgroundColor: palette.miqueias.solid,
-                    borderRadius: 8
-                }];
-            } else if (tipo === 'klein') {
-                chartComparacao.data.datasets = [{
-                    label: "Apenas Klein",
-                    data: semanal.map(i => i.klein),
-                    backgroundColor: palette.klein.solid,
-                    borderRadius: 8
-                }];
-            }
-
-            chartComparacao.update('active');
+            
+            renderizarGraficoVendedores(viewVendedorAtual);
         }
 
-        // Modais de Controle
+        // ============================================================
+        // MODAIS DE CONTROLE
+        // ============================================================
         function mostrarFeedback(tipo, titulo, mensagem) {
             const modal = document.getElementById('modal-feedback');
             const iconContainer = document.getElementById('feedback-icon-container');
             const txtTitulo = document.getElementById('feedback-titulo');
             const txtMensagem = document.getElementById('feedback-mensagem');
             const btnFechar = document.getElementById('feedback-btn-fechar');
-
             modal.classList.remove('hidden');
             btnFechar.classList.add('hidden');
-            
             txtTitulo.innerText = titulo;
             txtMensagem.innerText = mensagem;
-
             if (tipo === "processando") {
                 iconContainer.className = "w-16 h-16 mx-auto rounded-full bg-blue-50 text-blue-500 flex items-center justify-center animate-spin border border-blue-100";
                 iconContainer.innerHTML = `<i data-lucide="loader-2" class="w-8 h-8"></i>`;

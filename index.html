@@ -316,34 +316,51 @@
                         <canvas id="graficoTotal"></canvas>
                     </div>
                 </div>
+            </div>
 
-                <!-- Gráfico 3: Comparação de Vendedores Diário -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 lg:col-span-2 shadow-sm">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <!-- Gráficos de Produtos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Gráfico 3: Vendas por Produto (G7:L12) -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm lg:col-span-2">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                         <div>
-                            <h3 class="font-bold text-slate-900">Acompanhamento de Vendedores</h3>
-                            <p class="text-xs text-slate-500">Vendas diárias detalhadas (Lara, Miqueias e Klein)</p>
+                            <h3 class="font-bold text-slate-900">Vendas por Produto</h3>
+                            <p class="text-xs text-slate-500">Quantidade vendida por dia da semana</p>
                         </div>
-                        
-                        <!-- Filtros Rápidos -->
-                        <div class="bg-slate-100 p-1.5 rounded-2xl border border-slate-200 flex flex-wrap gap-1 w-fit">
-                            <button onclick="filtrarComparativo('todos')" id="btn-f-todos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">
-                                Todos
-                            </button>
-                            <button onclick="filtrarComparativo('lara')" id="btn-f-lara" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-                                Lara
-                            </button>
-                            <button onclick="filtrarComparativo('miqueias')" id="btn-f-miqueias" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-                                Miqueias
-                            </button>
-                            <button onclick="filtrarComparativo('klein')" id="btn-f-klein" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-                                Klein
-                            </button>
-                        </div>
+                        <span class="text-xs font-bold bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full border border-purple-100">Produtos</span>
                     </div>
                     <div class="chart-container" style="height: 380px;">
-                        <canvas id="graficoComparacao"></canvas>
+                        <canvas id="graficoProdutos"></canvas>
                     </div>
+                </div>
+            </div>
+
+            <!-- Gráfico 4: Comparação de Vendedores Diário -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-900">Acompanhamento de Vendedores</h3>
+                        <p class="text-xs text-slate-500">Vendas diárias detalhadas (Lara, Miqueias e Klein)</p>
+                    </div>
+                    
+                    <!-- Filtros Rápidos -->
+                    <div class="bg-slate-100 p-1.5 rounded-2xl border border-slate-200 flex flex-wrap gap-1 w-fit">
+                        <button onclick="filtrarComparativo('todos')" id="btn-f-todos" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">
+                            Todos
+                        </button>
+                        <button onclick="filtrarComparativo('lara')" id="btn-f-lara" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                            Lara
+                        </button>
+                        <button onclick="filtrarComparativo('miqueias')" id="btn-f-miqueias" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                            Miqueias
+                        </button>
+                        <button onclick="filtrarComparativo('klein')" id="btn-f-klein" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                            Klein
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 380px;">
+                    <canvas id="graficoComparacao"></canvas>
                 </div>
             </div>
 
@@ -420,7 +437,7 @@
         // ============================================================
         // URL FIXA DO WEB APP
         // ============================================================
-        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycbzd8r7E55ZwAP-ysT0Zos5kTi2vlU2oIoa_1RMHgoS74WSz19jGt6d67p8qOoScCtAd0Q/exec";
+        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycbyKJ8XI2-gBYs_1di9ae6EyP7iqJCSlf9BTNzf4wKEkYU4j9HO4ZsfCx_5zJVDkAE4KuQ/exec";
         
         // URL da API - usando a URL fixa
         let googleWebAppUrl = WEB_APP_URL_FIXA;
@@ -429,6 +446,7 @@
         let chartVendedores = null;
         let chartTotal = null;
         let chartComparacao = null;
+        let chartProdutos = null;
         let dadosCarregados = null;
         let isRefreshing = false;
 
@@ -452,6 +470,18 @@
             total: { border: '#6366f1', fill: 'rgba(99, 102, 241, 0.12)' }
         };
 
+        // Cores para produtos (paleta expandida)
+        const coresProdutos = [
+            '#ef4444', // Vermelho
+            '#f59e0b', // Amarelo
+            '#10b981', // Verde Esmeralda
+            '#3b82f6', // Azul
+            '#8b5cf6', // Roxo
+            '#ec4899', // Rosa
+            '#14b8a6', // Teal
+            '#f97316'  // Laranja
+        ];
+
         // Dados Locais em caso de Erro de Rede ou Offline
         const mockDadosIniciais = {
             vendedores: [
@@ -465,6 +495,38 @@
                 { dia: "Quarta", total: 2200, lara: 900, miqueias: 800, klein: 500 },
                 { dia: "Quinta", total: 2300, lara: 1000, miqueias: 800, klein: 500 },
                 { dia: "Sexta", total: 2700, lara: 1000, miqueias: 900, klein: 800 }
+            ],
+            produtos: [
+                {
+                    nome: "BROWNIE CHOCOLATE",
+                    vendas: [
+                        { dia: "Segunda", quantidade: 5 },
+                        { dia: "Terça", quantidade: 8 },
+                        { dia: "Quarta", quantidade: 6 },
+                        { dia: "Quinta", quantidade: 10 },
+                        { dia: "Sexta", quantidade: 12 }
+                    ]
+                },
+                {
+                    nome: "BROWNIE LEITE NINHO",
+                    vendas: [
+                        { dia: "Segunda", quantidade: 3 },
+                        { dia: "Terça", quantidade: 5 },
+                        { dia: "Quarta", quantidade: 4 },
+                        { dia: "Quinta", quantidade: 7 },
+                        { dia: "Sexta", quantidade: 9 }
+                    ]
+                },
+                {
+                    nome: "CAFÉ",
+                    vendas: [
+                        { dia: "Segunda", quantidade: 20 },
+                        { dia: "Terça", quantidade: 25 },
+                        { dia: "Quarta", quantidade: 22 },
+                        { dia: "Quinta", quantidade: 28 },
+                        { dia: "Sexta", quantidade: 30 }
+                    ]
+                }
             ]
         };
 
@@ -537,6 +599,7 @@
             renderizarGraficoVendedores(dadosCarregados.vendedores);
             renderizarGraficoTotal(dadosCarregados.semanal);
             renderizarGraficoComparacao(dadosCarregados.semanal);
+            renderizarGraficoProdutos(dadosCarregados.produtos);
 
             // Tooltip do botão refresh
             const btnRefresh = document.getElementById('btn-refresh');
@@ -550,7 +613,7 @@
         });
 
         // ============================================================
-        // DEMAIS FUNÇÕES (mantidas do código anterior)
+        // DEMAIS FUNÇÕES
         // ============================================================
         
         // Alternância de Abas
@@ -575,6 +638,7 @@
                     if (chartVendedores) chartVendedores.resize();
                     if (chartTotal) chartTotal.resize();
                     if (chartComparacao) chartComparacao.resize();
+                    if (chartProdutos) chartProdutos.resize();
                 }, 50);
             }
         }
@@ -785,6 +849,7 @@
             renderizarGraficoVendedores(dadosCarregados.vendedores);
             renderizarGraficoTotal(dadosCarregados.semanal);
             renderizarGraficoComparacao(dadosCarregados.semanal);
+            renderizarGraficoProdutos(dadosCarregados.produtos);
 
             mostrarFeedback("sucesso", "Venda Registrada (Simulação)", "Venda adicionada ao Dashboard local com sucesso!");
             resetFormulario();
@@ -812,6 +877,7 @@
                     renderizarGraficoVendedores(dados.vendedores);
                     renderizarGraficoTotal(dados.semanal);
                     renderizarGraficoComparacao(dados.semanal);
+                    renderizarGraficoProdutos(dados.produtos);
                 }
             } catch (error) {
                 console.warn("Utilizando estrutura padrão de dados.");
@@ -963,7 +1029,82 @@
             });
         }
 
-        // Gráfico 3: Comparação de Vendedores
+        // Gráfico 3: Vendas por Produto (NOVO)
+        function renderizarGraficoProdutos(produtosData) {
+            if (!produtosData || produtosData.length === 0) return;
+            
+            const ctx = document.getElementById("graficoProdutos").getContext("2d");
+
+            if (chartProdutos) {
+                chartProdutos.destroy();
+            }
+
+            // Pega os dias da semana do primeiro produto
+            const dias = produtosData[0]?.vendas.map(v => v.dia) || ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+
+            // Cria datasets para cada produto
+            const datasets = produtosData.map((produto, index) => {
+                const cor = coresProdutos[index % coresProdutos.length];
+                return {
+                    label: produto.nome,
+                    data: produto.vendas.map(v => v.quantidade || 0),
+                    backgroundColor: cor, // 50% de opacidade
+                    borderColor: cor,
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.7
+                };
+            });
+
+            chartProdutos = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: dias,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#334155',
+                                font: { weight: '700', size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            callbacks: {
+                                label: context => ` ${context.dataset.label}: ${context.raw} unidades`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                            ticks: {
+                                color: '#64748b',
+                                stepSize: 1
+                            },
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Quantidade Vendida',
+                                color: '#64748b'
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico 4: Comparação de Vendedores
         function renderizarGraficoComparacao(semanal) {
             if (!semanal) return;
             const ctx = document.getElementById("graficoComparacao").getContext("2d");
@@ -1150,12 +1291,10 @@
         }
 
         function salvarConfiguracoes() {
-            // A URL é fixa, então apenas mostramos um feedback
             mostrarFeedback("sucesso", "URL Fixa", "A URL do Web App está configurada permanentemente.");
         }
 
         function limparConfiguracoes() {
-            // Não faz nada pois a URL é fixa
             mostrarFeedback("sucesso", "Configuração Fixa", "A URL do Web App é permanente e não pode ser alterada.");
         }
     </script>
